@@ -1,22 +1,17 @@
-function! s:ansible_vault(subcmd) abort
-  if !executable('ansible-vault')
-    echoerr 'ansible-vault: not found in your PATH'
+function! s:sops(subcmd) abort
+  if !executable('sops')
+    echoerr 'sops: not found in your PATH'
     return
   endif
   if a:subcmd == 'encrypt'
-    setlocal ft=ansible-vault
+    setlocal ft=sops
   elseif a:subcmd == 'decrypt'
     setlocal ft=yaml
   else
     echoerr 'Only "encrypt" or "decrypt" will be accepted for subcommand'
     return
   endif
-  let password_file = expand(get(g:, 'ansible_vault_password_file', '~/.vault_password'))
-  if !filereadable(password_file)
-    echoerr printf('%s: no such password file for ansible-vault', password_file)
-    return
-  endif
-  let cmd = printf('ansible-vault %s --vault-password-file=%s', a:subcmd, password_file)
+  let cmd = printf('sops --%s', a:subcmd)
   call setqflist([])
   let tmpfile = ''
   if stridx(cmd, '%s') > -1
@@ -43,20 +38,20 @@ function! s:ansible_vault(subcmd) abort
   call setpos('.', pos)
 endfunction
 
-nnoremap <silent> <Plug>(ansible_vault) :<C-u>call <SID>ansible_vault()<CR>
+nnoremap <silent> <Plug>(sops) :<C-u>call <SID>sops()<CR>
 
-command! -nargs=0 AnsibleVaultEncrypt call <SID>ansible_vault('encrypt')
-command! -nargs=0 AnsibleVaultDecrypt call <SID>ansible_vault('decrypt')
+command! -nargs=0 SopsEncrypt call <SID>sops('encrypt')
+command! -nargs=0 SopsDecrypt call <SID>sops('decrypt')
 
-au BufNewFile,BufRead *.yml,*.yaml call s:detect_ansible_vault()
+au BufNewFile,BufRead *.yml,*.yaml call s:detect_sops()
 
-function! s:detect_ansible_vault()
+function! s:detect_sops()
   let n = 1
   while n < 10 && n < line('$')
     if getline(n) =~ 'ANSIBLE_VAULT'
-      set filetype=ansible-vault
-      " if confirm('Decrypt with ansible-vault?', "yes\nNo", 2) == 1
-      "   AnsibleVaultDecrypt
+      set filetype=sops
+      " if confirm('Decrypt with SOPS?', "yes\nNo", 2) == 1
+      "   SopsDecrypt
       " endif
     endif
     let n = n + 1

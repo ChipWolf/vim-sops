@@ -1,7 +1,7 @@
-vim-ansible-vault
+vim-sops
 =================
 
-Encrypt/Decrypt the file contents on the buffer from Vim command line with `ansible-vault`
+Encrypt/Decrypt the file contents on the buffer from Vim command line with `sops`
 
 ## Usage
 
